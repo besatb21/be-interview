@@ -1,10 +1,7 @@
-from pydoc import locate
-from typing import Optional
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, status, Depends
-from mypyc.ir.ops import LoadAddress
-from sqlalchemy import and_
-from sqlmodel import select, Session
+from fastapi import APIRouter, HTTPException, status, Depends, Path
+from sqlmodel import select, Session, and_
 
 from app.db import get_db
 from app.models import Location, Organisation, CreateOrganisation, CreateLocation, BoundingBox
@@ -55,19 +52,15 @@ def create_location(location: CreateLocation, session: Session = Depends(get_db)
     return location
 
 
-
-
 @router.get("/{organisation_id}/locations")
-def get_organisation_locations(organisation_id: int,bounding_box: Optional[BoundingBox]=None,
+def get_organisation_locations(organisation_id: int, q: Annotated[BoundingBox | None,Path()] = None,
                                session: Session = Depends(get_db)):
-
-
-    if bounding_box:
+    if q:
         organisation_locations = session.exec(select(Location).where(and_(Location.organisation_id == organisation_id,
-                                                                          Location.latitude<=bounding_box.x_max,
-                                                                          Location.latitude>=bounding_box.x_min,
-                                                                          Location.longitude<=bounding_box.y_max,
-                                                                          Location.longitude >= bounding_box.y_min)))
+                                                                          Location.latitude <= q.x_max,
+                                                                          Location.latitude >= q.x_min,
+                                                                          Location.longitude <= q.y_max,
+                                                                          Location.longitude >= q.y_min)))
     else:
         organisation_locations = session.exec(select(Location).where(Location.organisation_id == organisation_id))
 
