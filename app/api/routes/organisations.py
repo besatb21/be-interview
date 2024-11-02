@@ -67,7 +67,7 @@ def get_organisation_locations(organisation_id: int,bounding_box: Optional[Bound
                                                                           Location.latitude<=bounding_box.x_max,
                                                                           Location.latitude>=bounding_box.x_min,
                                                                           Location.longitude<=bounding_box.y_max,
-                                                                          Location.longitude >= bounding_box.y_min,)))
+                                                                          Location.longitude >= bounding_box.y_min)))
     else:
         organisation_locations = session.exec(select(Location).where(Location.organisation_id == organisation_id))
 
