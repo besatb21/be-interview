@@ -53,13 +53,12 @@ def create_location(location: CreateLocation, session: Session = Depends(get_db)
     return location
 
 
-
 @router.get("/{organisation_id}/locations")
 def get_organisation_locations(organisation_id: int, session: Session = Depends(get_db)):
-    location_ids = session.exec(select(Location.id).where(Location.organisation_id == organisation_id)).all()
+    organisation_locations = session.exec(select(Location).where(Location.organisation_id == organisation_id)).all()
     result = []
-    for location_id in location_ids:
-        location = session.exec(select(Location).where(Location.id == location_id)).one()
+
+    for location in organisation_locations:
         result.append({"location_name": location.location_name, "location_longitude": location.longitude,
                        "location_latitude": location.latitude})
     return result
