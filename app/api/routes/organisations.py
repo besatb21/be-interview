@@ -42,9 +42,10 @@ def get_organisation(organisation_id: int, session: Session = Depends(get_db)) -
 
 @router.post("/create/locations")
 def create_location(location: CreateLocation, session: Session = Depends(get_db)) -> Location:
-    location = Location(name=location.name, address=location.address,
-                        city=location.city, state=location.state,
-                        country=location.country
+    location = Location(location_name=location.location_name,
+                        latitude=location.latitude,
+                        longitude=location.longitude,
+                        organisation_id=location.organisation_id,
                         )
     session.add(location)
     session.commit()
