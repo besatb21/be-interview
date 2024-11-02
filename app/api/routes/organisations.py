@@ -1,11 +1,13 @@
 from pydoc import locate
+from typing import Optional
 
 from fastapi import APIRouter, HTTPException, status, Depends
 from mypyc.ir.ops import LoadAddress
+from sqlalchemy import and_
 from sqlmodel import select, Session
 
 from app.db import get_db
-from app.models import Location, Organisation, CreateOrganisation, CreateLocation
+from app.models import Location, Organisation, CreateOrganisation, CreateLocation, BoundingBox
 
 router = APIRouter()
 
@@ -53,9 +55,22 @@ def create_location(location: CreateLocation, session: Session = Depends(get_db)
     return location
 
 
+
+
 @router.get("/{organisation_id}/locations")
-def get_organisation_locations(organisation_id: int, session: Session = Depends(get_db)):
-    organisation_locations = session.exec(select(Location).where(Location.organisation_id == organisation_id)).all()
+def get_organisation_locations(organisation_id: int,bounding_box: Optional[BoundingBox]=None,
+                               session: Session = Depends(get_db)):
+
+
+    if bounding_box:
+        organisation_locations = session.exec(select(Location).where(and_(Location.organisation_id == organisation_id,
+                                                                          Location.latitude<=bounding_box.x_max,
+                                                                          Location.latitude>=bounding_box.x_min,
+                                                                          Location.longitude<=bounding_box.y_max,
+                                                                          Location.longitude >= bounding_box.y_min,)))
+    else:
+        organisation_locations = session.exec(select(Location).where(Location.organisation_id == organisation_id))
+
     result = []
 
     for location in organisation_locations:

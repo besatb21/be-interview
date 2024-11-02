@@ -27,3 +27,10 @@ class CreateLocation(Base):
     location_name: str
     longitude: float
     latitude: float
+
+
+class BoundingBox(Base):
+    x_min: float
+    y_min: float
+    x_max: float
+    y_max: float
